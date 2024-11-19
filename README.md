@@ -105,8 +105,7 @@ var meanPrecip = precip.mean().clip (kenya);
 Map.addLayer (meanPrecip, vis, 'Mean Precipitation 1981 - 2023');
 ```
 
-### To  quantify  trends  in  each  pixel  using  the  non-parametric  Mann-Kendall  test  for trend  significance  and  Sen’s  slope  estimator  for  magnitude resort to this
-[[script]](https://code.earthengine.google.com/c141f45513e9ce5729868092edce46ed)
+### To  quantify  trends  in  each  pixel  using  the  non-parametric  Mann-Kendall  test  for trend  significance  and  Sen’s  slope  estimator  for  magnitude resort to this [[script]](https://code.earthengine.google.com/c141f45513e9ce5729868092edce46ed)
 ```bash
 //Load data collection (For other datasets such as ERA5 - Do well to convert from Kelvis to celsius when processing the data for temperature)
 var dataCollection = ee.ImageCollection('UCSB-CHG/CHIRPS/PENTAD') 
@@ -302,14 +301,13 @@ Export.image.toDrive({   // Zscore
 ```
 ## Potential Output
 
-<img src="diagrams/labels_spatial_distribution.png" alt="Spatial distribution of labels" height="400px"/>
+<img src="app_example.png" alt="CLIMATE TRENDS - SENEGAL (1981-2020)" height="400px"/>
 
-Fing our developed Climate Trends App utilizing this approach [[here]](https://diana-botchway-frimpong.users.earthengine.app/view/climate-trends---senegal)
-
+Find the live dashboard [[here]](https://diana-botchway-frimpong.users.earthengine.app/view/climate-trends---senegal)
 
 
 Once all data is extracted and processed, inside GEE it can be exported:
-- [ ] For further visualization in ArcGIS Pro
+- [ ] For further visualization in ArcGIS Pro or
 - [ ] To R, where the Mann-Kendall and Sen’s slope tests can be applied using the ’trend’ package.
 
 
