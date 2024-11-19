@@ -106,30 +106,30 @@ Map.addLayer (meanPrecip, vis, 'Mean Precipitation 1981 - 2023');
 ```
 
 To  quantify  trends  in  each  pixel  using  the  non-parametric  Mann-Kendall  test  for trend  significance  and  Sen’s  slope  estimator  for  magnitude resort to this
-script
+[[script]](https://code.earthengine.google.com/c141f45513e9ce5729868092edce46ed)
 ```bash
 //Load data collection (For other datasets such as ERA5 - Do well to convert from Kelvis to celsius when processing the data for temperature)
-var dataCollection = ee.ImageCollection('UCSB-CHG/CHIRPS/PENTAD')
+var dataCollection = ee.ImageCollection('UCSB-CHG/CHIRPS/PENTAD') 
     .select(['precipitation'])
 
 // Import country boundaries feature collection.
 var dataset = ee.FeatureCollection('USDOS/LSIB_SIMPLE/2017');
 
-// Apply filter where country name equals Senegal.
+// Apply filter where country name equals Uganda.
 var senegal = dataset.filter(ee.Filter.eq('country_na', 'Senegal'));
 
 
-// Add Senegal outline to the Map as a layer.
+// Add Uganda outline to the Map as a layer.
 Map.centerObject(senegal, 6);
 
 var eps = 1e-6;
 
 // time series
-var annualmax = ee.List.sequence(2001, 2020).map(
+var annualmax = ee.List.sequence(1981, 2020).map(
     function (year) {
         // map the time series into monthly means (for season calculation, change months here according to season)
         return ee.ImageCollection(
-            ee.List.sequence(10, 12).cat(ee.List.sequence(1, 5)).map(//Monsoon: 6,7,8,9/ post-monsoon: 10,11/ winter: 12,2,1/ pre-monsoon: 3,4,5
+            ee.List.sequence(1, 12).map(//Monsoon: 6,7,8,9/ post-monsoon: 10,11/ winter: 12,2,1/ pre-monsoon: 3,4,5
                 function (month) {
                     var date = ee.Date.fromYMD(year, month, 1);
                     // mean chlor_a (log-normal)
@@ -242,9 +242,32 @@ Map.addLayer(clippedzscore,zVis, 'zscore');
 Map.addLayer(clippedslope, slopeVis, 'slope');
 Map.addLayer(clippedsignif, sigVis, 'significance');//(alpha = <0.05)
 
+//#####################Masking_Slope <1.96 (Insignificant)##################################
+//var slope_select = senslope.select('slope')
+
+var significant_zscore = clippedzscore.gte(1.96);
+var Insignificant_zscore = clippedzscore.lte(1.96);
+
+var mask_significant_zscore = clippedzscore.updateMask(significant_zscore);
+var mask_insignificant_zscore = clippedzscore.updateMask(Insignificant_zscore);
+
+Map.addLayer(mask_significant_zscore, {palette: ['2b83ba']}, 'mask_significant_zscore');
+//Map.addLayer(mask_insignificant_zscore.clip(senegal), {palette: ['abdda4']}, 'mask_insignificant_zscore');
+
+// Export the image to an Earth Engine asset.
+Export.image.toDrive({   // Sen's slope image
+  image: mask_significant_zscore,
+  description: 'mask_significant_zscoreAnnual1981-2020precip',
+  scale: 500, 
+  maxPixels:1000000000000,
+  region: senegal
+});
+
+//#####################Exporting##################################
+
 Export.image.toDrive({   // Sen's slope image
   image: clippedslope,
-  description: 'Pixelwise_Sen_slopeOct-May2001-2020',
+  description: 'Pixelwise_Sen_slopeAnnual1981-2020precip',
   scale: 500, 
   maxPixels:1000000000000,
   region: senegal
@@ -252,7 +275,7 @@ Export.image.toDrive({   // Sen's slope image
 
 Export.image.toDrive({// for testing the significance level
 image:clippedsignif,
-description: 'Statistical_SignificanceOct-May2001-2020',
+description: 'Statistical_SignificanceAnnual1981-2020precip',
 scale: 500, 
 maxPixels:1000000000000,
 region: senegal
@@ -260,14 +283,26 @@ region: senegal
 
 Export.image.toDrive({   // Zscore
   image: clippedzscore,
-  description: 'Pixelwise_ZscoreOct-May2001-2020',
+  description: 'Pixelwise_ZscoreAnnual1981-2020precip',
   scale: 500, 
   maxPixels:1000000000000,
   region: senegal
 });
+
+// var list = ee.List.sequence(5, 10).reverse();
+// print(list, 'here')
+
+// var list2 = ee.List.sequence(10, 12);
+// print(list2, 'here2')
+
+// var list3 = ee.List.sequence(10, 12).cat(ee.List.sequence(1, 5));
+// print(list3, 'here3')
+
+//ee.List.sequence(1, 12).cat(ee.List.sequence(1, 5)).map
 ```
 ## Potential Output
-![Potential Outputs](assets/pipeline.png)
+Fing our developed app utilizing this approach [[here]](https://diana-botchway-frimpong.users.earthengine.app/view/climate-trends---senegal)
+
 
 
 Once all data is extracted and processed, inside GEE it can be exported:
@@ -277,6 +312,7 @@ Once all data is extracted and processed, inside GEE it can be exported:
 
 
 # Citation
+If you use method in your research, please use the following citation:
 ```
 @article{nakalembe202440,
   title={A 40-Year Remote Sensing Analysis of Spatiotemporal Temperature and Rainfall Patterns in Senegal},
