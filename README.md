@@ -9,7 +9,7 @@ This repository houses scripts that can be used to run a climate trend analysis 
 
 # Generating trends in GEE
 
-To generate temperature trends use the following [[script]](https://code.earthengine.google.com/0349a7632327e3544eff4a1f93adfa67)
+### To generate temperature trends use the following [[script]](https://code.earthengine.google.com/0349a7632327e3544eff4a1f93adfa67)
 ```bash
 //import country boundary
 var dataset = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017")
@@ -55,7 +55,7 @@ var tempVisParams = {
 Map.addLayer(MeanAirTemp.clip(kenya), tempVisParams, 'Mean AirTemp 1981-2023')
 ```
 
-To generate precipitation trends use the following [[script]](https://code.earthengine.google.com/8c7f92b47009c0bf9707ed040aebd368)
+### To generate precipitation trends use the following [[script]](https://code.earthengine.google.com/8c7f92b47009c0bf9707ed040aebd368)
 ```bash
 //import country boundary
 var dataset = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017")
@@ -105,7 +105,7 @@ var meanPrecip = precip.mean().clip (kenya);
 Map.addLayer (meanPrecip, vis, 'Mean Precipitation 1981 - 2023');
 ```
 
-To  quantify  trends  in  each  pixel  using  the  non-parametric  Mann-Kendall  test  for trend  significance  and  Sen’s  slope  estimator  for  magnitude resort to this
+### To  quantify  trends  in  each  pixel  using  the  non-parametric  Mann-Kendall  test  for trend  significance  and  Sen’s  slope  estimator  for  magnitude resort to this
 [[script]](https://code.earthengine.google.com/c141f45513e9ce5729868092edce46ed)
 ```bash
 //Load data collection (For other datasets such as ERA5 - Do well to convert from Kelvis to celsius when processing the data for temperature)
@@ -301,7 +301,10 @@ Export.image.toDrive({   // Zscore
 //ee.List.sequence(1, 12).cat(ee.List.sequence(1, 5)).map
 ```
 ## Potential Output
-Fing our developed app utilizing this approach [[here]](https://diana-botchway-frimpong.users.earthengine.app/view/climate-trends---senegal)
+
+<img src="diagrams/labels_spatial_distribution.png" alt="Spatial distribution of labels" height="400px"/>
+
+Fing our developed Climate Trends App utilizing this approach [[here]](https://diana-botchway-frimpong.users.earthengine.app/view/climate-trends---senegal)
 
 
 
