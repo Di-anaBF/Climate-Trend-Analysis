@@ -107,7 +107,8 @@ Map.addLayer (meanPrecip, vis, 'Mean Precipitation 1981 - 2023');
 
 ### To  quantify  trends  in  each  pixel  using  the  non-parametric  Mann-Kendall  test  for trend  significance  and  Sen’s  slope  estimator  for  magnitude resort to this [[script]](https://code.earthengine.google.com/c141f45513e9ce5729868092edce46ed)
 ```bash
-//Load data collection (For other datasets such as ERA5 - Do well to convert from Kelvis to celsius when processing the data for temperature)
+//Load data collection (For other datasets such as ERA5 - Do well to convert from Kelvin to celsius when processing
+the data for temperature)
 var dataCollection = ee.ImageCollection('UCSB-CHG/CHIRPS/PENTAD') 
     .select(['precipitation'])
 
@@ -313,7 +314,7 @@ Once all data is extracted and processed, inside GEE it can be exported:
 
 
 # Citation
-If you use method in your research, please use the following citation:
+If you use method in your research, please acknowledge us using the following citation:
 ```
 @article{nakalembe202440,
   title={A 40-Year Remote Sensing Analysis of Spatiotemporal Temperature and Rainfall Patterns in Senegal},
