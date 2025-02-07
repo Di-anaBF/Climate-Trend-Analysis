@@ -9,24 +9,28 @@ This repository houses scripts that can be used to run a climate trend analysis 
 
 # Generating trends in GEE
 
-### To generate temperature trends use the following [[script]](https://code.earthengine.google.com/0349a7632327e3544eff4a1f93adfa67)
+### To generate temperature trends use the following [[script]](https://code.earthengine.google.com/9e739af6ed1a3aa1865c6fa7ecfd5336)
 ```bash
 //import country boundary
 var dataset = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017")
 
 
 //Filter the country boundary to study area
-var kenya = dataset.filter(ee.Filter.eq('country_na', 'Kenya')) //can change this to whatever region of interest
-Map.centerObject(kenya,6)
+var Tanzania = dataset.filter(ee.Filter.eq('country_na', 'Tanzania')) //can change to region of interest
+Map.centerObject(Tanzania,6)
+
 
 //Map.addLayer(dataset,{}, 'World Country')
-Map.addLayer(kenya,{}, 'Kenya')
+Map.addLayer(Tanzania,{}, 'Tanzania')
 
 // #############################################################################
+
 
 //Load data collection
 var dataset = ee.ImageCollection("ECMWF/ERA5_LAND/MONTHLY_AGGR")
 .select('temperature_2m')
+
+
 
 // Scale to Kelvin and convert to Celsius, set image acquisition time.
 var dataset_convert = dataset.map(function(img) {
@@ -35,34 +39,103 @@ var dataset_convert = dataset.map(function(img) {
     .copyProperties(img, ['system:time_start']);
 });
 
-//define date range of interest 
-var Era5_TREND = dataset_convert.filterDate('1981-01-01','2023-12-31');
+//define date range of interest "for your AOI"
+var Era5_TREND = dataset_convert.filterDate('1981-01-01','2020-12-31');
+//var Era5_TREND1 = dataset_convert.filterDate('2020-01-01','2020-12-31');
 
 var MeanAirTemp = Era5_TREND.mean()
+//var MeanAirTemp1 = Era5_TREND1.mean()
 
-//Chart the full time series for your AOI
-var TS1 = ui.Chart.image.series (Era5_TREND, kenya, ee.Reducer.mean(),1000,'system:time_start').setOptions({
-  title:'Average LST from 1981-2023(ERA5)', 
+//Time series Chart for AOI
+var TS1 = ui.Chart.image.series (Era5_TREND, Tanzania, ee.Reducer.mean(),1000,'system:time_start').setOptions({
+  title:'Average LST from 1981-2020(ERA5)', 
   vAxis: {title: '°C'}, });
 
 print(TS1);
 
-var tempVisParams = {
-  min:15,
-  max:30,
-  palette: ['2b83ba','abdda4','ffffbf', 'ff6227', 'ff4500']
+//Chart a single year
+var temp1year = Era5_TREND.filterDate('2020-01-01','2020-12-31');
+var TS2 = ui.Chart.image.series (temp1year, Tanzania, ee.Reducer.mean(),1000, 'system:time_start').setOptions({
+title: 'Average Temperature for 2020',
+vAxis: {title: 'mm/pentad'}, });
+
+print (TS2);
+
+
+var palette = {
+  min:19,
+  max:26,
+  palette: ['#305CDE', '#6E8DE8', '#97ADEE' ,'#C0CDF5', '#ffffff', '#ED6C69', '#cd1c18', '#780606'],
+  values: [19,20,21,22,23,24,25,26]
 }
-Map.addLayer(MeanAirTemp.clip(kenya), tempVisParams, 'Mean AirTemp 1981-2023')
+Map.addLayer(MeanAirTemp.clip(Tanzania), palette, 'Mean AirTemp 1981-2020')
+//Map.addLayer(MeanAirTemp1.clip(Tanzania), palette, 'Mean AirTemp for 2020')
+
+// #############################################################################
+
+
+Export.image.toDrive({
+  image: MeanAirTemp, 
+  description: "Mean_AirTempTanzania_1981-2020Annual", 
+  region: Tanzania, 
+  scale: 1000, 
+  crs: "EPSG:32630"
+})
+
+//########################################LEGEND######################################################################
+
+
+// Define the palette and corresponding unique values
+var uniqueValues = [19, 20, 21, 22, 23, 24, 25, 26];
+var colors = ['#305CDE', '#6E8DE8', '#97ADEE' ,'#C0CDF5', '#ffffff', '#ED6C69', '#cd1c18', '#780606'];
+
+// Create the legend title
+var legendTitle = ui.Label({
+  value: 'Average Temperature from 1981-2020 (°C)',
+  style: {fontWeight: 'bold', fontSize: '14px', margin: '0 0 4px 0', textAlign: 'center'}
+});
+
+// Create a panel to hold the legend items
+var legendItems = ui.Panel({
+  layout: ui.Panel.Layout.flow('vertical'),
+  style: {margin: '0px 0px', textAlign: 'left'}
+});
+
+// Add each unique value and its corresponding color to the legend
+uniqueValues.forEach(function(value, index) {
+  var colorBox = ui.Label('', {
+    backgroundColor: colors[index],
+    padding: '8px',
+    margin: '0 4px 0 0'
+  });
+  var label = ui.Label(value.toString(), {margin: '0px 0px 0px 4px'});
+  var legendRow = ui.Panel({
+    widgets: [colorBox, label],
+    layout: ui.Panel.Layout.flow('horizontal')
+  });
+  legendItems.add(legendRow);
+});
+
+// Combine the title and legend items into a single legend panel
+var legendPanel = ui.Panel({
+  widgets: [legendTitle, legendItems],
+  style: {position: 'top-right', padding: '8px'}
+});
+
+// Add the legend to the map
+Map.add(legendPanel);
+
+
 ```
 
-### To generate precipitation trends use the following [[script]](https://code.earthengine.google.com/8c7f92b47009c0bf9707ed040aebd368)
+### To generate precipitation trends use the following [[script]](https://code.earthengine.google.com/c659f73f1b6b8acbda277a5244532c30)
 ```bash
 //import country boundary
 var dataset = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017")
 
-//Filter the country boundary to study area
-var kenya = dataset.filter(ee.Filter.eq('country_na', 'Kenya'))
-Map.centerObject(kenya,6)
+//Filter the country boundary to your study area
+var Tanzania = dataset.filter(ee.Filter.eq('country_na', 'Tanzania'))
+Map.centerObject(Tanzania,6)
 
 
 // #############################################################################
@@ -70,39 +143,93 @@ Map.centerObject(kenya,6)
 //Load data collection
 var CHIRPS = ee.ImageCollection( 'UCSB-CHG/CHIRPS/PENTAD');
 
-//define date range of interest "Senegal"
+//define date range of interest "for your study area"
 var precip = CHIRPS.filterDate('1981-01-01','2023-12-31')
 .filter(ee.Filter.calendarRange(1, 12, 'month'))
 
-//Chart the full time series for Senegal region
-var TS5 = ui.Chart.image.series (precip, kenya, ee.Reducer.mean(),1000,'system:time_start').setOptions({
+//Time series chart for your AOI
+var TS5 = ui.Chart.image.series (precip, Tanzania, ee.Reducer.mean(),1000,'system:time_start').setOptions({
   title:'Average Precipitation from 1981-2023', 
   vAxis: {title: 'mm/pentad'}, });
 
 print(TS5);
 
-// //Chart a single year //this has been commented out, however can be run if you want to analyze trends for a single year
-// var precip1year = CHIRPS.filterDate('2020-01-01','2020-12-31');
-// var TS1 = ui.Chart.image.series (precip1year, kenya, ee.Reducer.mean(),1000, 'system:time_start').setOptions({
-// title: 'Average Precipitation for 2020',
-// vAxis: {title: 'mm/pentad'}, });
+//Chart a single year
+var precip1year = CHIRPS.filterDate('2024-01-01','2024-12-31');
+var TS1 = ui.Chart.image.series (precip1year, Tanzania, ee.Reducer.mean(),1000, 'system:time_start').setOptions({
+title: 'Average Precipitation for 2024',
+vAxis: {title: 'mm/pentad'}, });
 
-// print (TS1);
+print (TS1);
 
 //visualizing the results
 var vis = {
-  min: 0,
-  max: 20,
-  palette:['caf0f8','ade8f4','90e0ef','48cae4','00b4d8', '0096c7', '0077b6', '023e8a', '03045e']
+  min: 5,
+  max: 28,
+  palette:['#674F13','#7C5F17','#916E1B','#A57E1F','#BA8E23','#DFB756','#F2E1B8','#ffffff','#00B7B2',
+'#00A09C', '#008985', '#00726F', '#005C59'],
+  value:[5,8,10,12,14,16,18,20,22,24,26,28,30]
 };
 
 //Map your result spatially
-//var yearPrecip = precip1year.mean().clip(kenya);
-var meanPrecip = precip.mean().clip (kenya);
+//var yearPrecip = precip1year.mean().clip(Tanzania);
+var meanPrecip = precip.mean().clip (Tanzania);
 
 //Map.addLayer(yearPrecip, vis,'Mean Precipitation for 2020');
-
 Map.addLayer (meanPrecip, vis, 'Mean Precipitation 1981 - 2023');
+
+// Export.image.toDrive({
+//   image: meanPrecip, 
+//   description: "Mean_Precip_1981-2023", 
+//   region: Tanzania, 
+//   scale: 1000, 
+//   crs: "EPSG:32630"
+// })
+
+
+//########################################LEGEND######################################################################
+
+
+// Define the palette and corresponding unique values
+var uniqueValues = [5,8,10,12,14,16,18,20,22,24,26,28,30];
+var colors = ['#674F13','#7C5F17','#916E1B','#A57E1F','#BA8E23','#DFB756','#F2E1B8','#ffffff','#00B7B2',
+'#00A09C', '#008985', '#00726F', '#005C59'];
+
+// Create the legend title
+var legendTitle = ui.Label({
+  value: 'Average Precipitation from 1981-2023 (MM)',
+  style: {fontWeight: 'bold', fontSize: '14px', margin: '0 0 4px 0', textAlign: 'center'}
+});
+
+// Create a panel to hold the legend items
+var legendItems = ui.Panel({
+  layout: ui.Panel.Layout.flow('vertical'),
+  style: {margin: '0px 0px', textAlign: 'left'}
+});
+
+// Add each unique value and its corresponding color to the legend
+uniqueValues.forEach(function(value, index) {
+  var colorBox = ui.Label('', {
+    backgroundColor: colors[index],
+    padding: '8px',
+    margin: '0 4px 0 0'
+  });
+  var label = ui.Label(value.toString(), {margin: '0px 0px 0px 4px'});
+  var legendRow = ui.Panel({
+    widgets: [colorBox, label],
+    layout: ui.Panel.Layout.flow('horizontal')
+  });
+  legendItems.add(legendRow);
+});
+
+// Combine the title and legend items into a single legend panel
+var legendPanel = ui.Panel({
+  widgets: [legendTitle, legendItems],
+  style: {position: 'top-right', padding: '8px'}
+});
+
+// Add the legend to the map
+Map.add(legendPanel);
 ```
 
 ### To  quantify  trends  in  each  pixel  using  the  non-parametric  Mann-Kendall  test  for trend  significance  and  Sen’s  slope  estimator  for  magnitude resort to this [[script]](https://code.earthengine.google.com/c141f45513e9ce5729868092edce46ed)
