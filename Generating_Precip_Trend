@@ -1,5 +1,6 @@
 ### To generate precipitation trends use the following [[script]](https://code.earthengine.google.com/c659f73f1b6b8acbda277a5244532c30)
 ```bash
+//Author:Diana B. Frimpong
 //import country boundary
 var dataset = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017")
 
