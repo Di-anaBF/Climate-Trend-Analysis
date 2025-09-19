@@ -1,1 +1,103 @@
+### To generate precipitation trends use the following [[script]](https://code.earthengine.google.com/c659f73f1b6b8acbda277a5244532c30)
+```bash
+//import country boundary
+var dataset = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017")
 
+//Filter the country boundary to your study area
+var Tanzania = dataset.filter(ee.Filter.eq('country_na', 'Tanzania'))
+Map.centerObject(Tanzania,6)
+
+
+// #############################################################################
+
+//Load data collection
+var CHIRPS = ee.ImageCollection( 'UCSB-CHG/CHIRPS/PENTAD');
+
+//define date range of interest "for your study area"
+var precip = CHIRPS.filterDate('1981-01-01','2023-12-31')
+.filter(ee.Filter.calendarRange(1, 12, 'month'))
+
+//Time series chart for your AOI
+var TS5 = ui.Chart.image.series (precip, Tanzania, ee.Reducer.mean(),1000,'system:time_start').setOptions({
+  title:'Average Precipitation from 1981-2023', 
+  vAxis: {title: 'mm/pentad'}, });
+
+print(TS5);
+
+//Chart a single year
+var precip1year = CHIRPS.filterDate('2024-01-01','2024-12-31');
+var TS1 = ui.Chart.image.series (precip1year, Tanzania, ee.Reducer.mean(),1000, 'system:time_start').setOptions({
+title: 'Average Precipitation for 2024',
+vAxis: {title: 'mm/pentad'}, });
+
+print (TS1);
+
+//visualizing the results
+var vis = {
+  min: 5,
+  max: 28,
+  palette:['#674F13','#7C5F17','#916E1B','#A57E1F','#BA8E23','#DFB756','#F2E1B8','#ffffff','#00B7B2',
+'#00A09C', '#008985', '#00726F', '#005C59'],
+  value:[5,8,10,12,14,16,18,20,22,24,26,28,30]
+};
+
+//Map your result spatially
+//var yearPrecip = precip1year.mean().clip(Tanzania);
+var meanPrecip = precip.mean().clip (Tanzania);
+
+//Map.addLayer(yearPrecip, vis,'Mean Precipitation for 2020');
+Map.addLayer (meanPrecip, vis, 'Mean Precipitation 1981 - 2023');
+
+// Export.image.toDrive({
+//   image: meanPrecip, 
+//   description: "Mean_Precip_1981-2023", 
+//   region: Tanzania, 
+//   scale: 1000, 
+//   crs: "EPSG:32630"
+// })
+
+
+//########################################LEGEND######################################################################
+
+
+// Define the palette and corresponding unique values
+var uniqueValues = [5,8,10,12,14,16,18,20,22,24,26,28,30];
+var colors = ['#674F13','#7C5F17','#916E1B','#A57E1F','#BA8E23','#DFB756','#F2E1B8','#ffffff','#00B7B2',
+'#00A09C', '#008985', '#00726F', '#005C59'];
+
+// Create the legend title
+var legendTitle = ui.Label({
+  value: 'Average Precipitation from 1981-2023 (MM)',
+  style: {fontWeight: 'bold', fontSize: '14px', margin: '0 0 4px 0', textAlign: 'center'}
+});
+
+// Create a panel to hold the legend items
+var legendItems = ui.Panel({
+  layout: ui.Panel.Layout.flow('vertical'),
+  style: {margin: '0px 0px', textAlign: 'left'}
+});
+
+// Add each unique value and its corresponding color to the legend
+uniqueValues.forEach(function(value, index) {
+  var colorBox = ui.Label('', {
+    backgroundColor: colors[index],
+    padding: '8px',
+    margin: '0 4px 0 0'
+  });
+  var label = ui.Label(value.toString(), {margin: '0px 0px 0px 4px'});
+  var legendRow = ui.Panel({
+    widgets: [colorBox, label],
+    layout: ui.Panel.Layout.flow('horizontal')
+  });
+  legendItems.add(legendRow);
+});
+
+// Combine the title and legend items into a single legend panel
+var legendPanel = ui.Panel({
+  widgets: [legendTitle, legendItems],
+  style: {position: 'top-right', padding: '8px'}
+});
+
+// Add the legend to the map
+Map.add(legendPanel);
+```
