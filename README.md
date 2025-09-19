@@ -1,5 +1,6 @@
 # Climate-Trend-Analysis
 This repository houses scripts that can be used to run a climate trend analysis in Google Earth Engine
+Author:Diana B. Frimpong
 
 
 **Prerequisites:**
@@ -11,6 +12,8 @@ This repository houses scripts that can be used to run a climate trend analysis 
 
 ### To generate temperature trends use the following [[script]](https://code.earthengine.google.com/9e739af6ed1a3aa1865c6fa7ecfd5336)
 ```bash
+//Author:Diana B. Frimpong
+
 //import country boundary
 var dataset = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017")
 
