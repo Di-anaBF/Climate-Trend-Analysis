@@ -1,6 +1,7 @@
 # Climate-Trend-Analysis
 This repository houses scripts that can be used to run a climate trend analysis in Google Earth Engine
-Author:Diana B. Frimpong
+
+**Author:Diana B. Frimpong**
 
 
 **Prerequisites:**
@@ -133,6 +134,8 @@ Map.add(legendPanel);
 
 ### To generate precipitation trends use the following [[script]](https://code.earthengine.google.com/c659f73f1b6b8acbda277a5244532c30)
 ```bash
+//Author:Diana B. Frimpong
+
 //import country boundary
 var dataset = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017")
 
@@ -237,6 +240,8 @@ Map.add(legendPanel);
 
 ### To  quantify  trends  in  each  pixel  using  the  non-parametric  Mann-Kendall  test  for trend  significance  and  Sen’s  slope  estimator  for  magnitude resort to this [[script]](https://code.earthengine.google.com/c141f45513e9ce5729868092edce46ed)
 ```bash
+//Author:Diana B. Frimpong
+
 //Load data collection (For other datasets such as ERA5 - Do well to convert from Kelvin to celsius when processing
 the data for temperature)
 var dataCollection = ee.ImageCollection('UCSB-CHG/CHIRPS/PENTAD') 
